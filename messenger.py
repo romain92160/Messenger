@@ -19,23 +19,55 @@ server = {
     ]
 }
 
-print('=== Messenger ===')
-print('x. Leave, utilisateurs, groupes')
-choice = input('Select an option: ')
-if choice == 'x':
-    print('Bye!')
-elif choice == 'utilisateurs' :
+
+def afficher_utilisateur():
     for user in server['users']:
         idnom = str(user['id']) + '. ' + user['name']
         print(idnom)
         #idnom = f"{user['id']}.{user['name']}"
+
+def afficher_groupes():
+    for chan in server['channels']:
+        print(chan['id'],chan['name'])
+
+def afficher_messages():
+    choicechannel = int(input('Select a channel id : '))
+    for mess in server['messages'] :
+        if mess['channel'] == choicechannel :
+            print(mess['content'])
+
+def ajouter_utilisateur():
+    identifiant = int(input('identifiant: '))
+    nom = str(input('nom utilisateur: '))
+    server['users'].append({'id' : identifiant,'name' : nom})
+
+def menu():
+    print('=== Messenger ===')
+    print('x. Leave, menu principal, utilisateurs, groupes, nouvel utilisateur, nouveau groupe')
+    choice = input('Select an option: ')
+    if choice == 'x':
+        print('Bye!')
+    elif choice == 'utilisateurs' :
+        afficher_utilisateur()
+    elif choice == 'groupes':
+        afficher_groupes()
+        afficher_messages()
+    elif choice == 'nouvel utilisateur' :
+        ajouter_utilisateur()
+
+print('=== Messenger ===')
+print('x. Leave, menu principal, utilisateurs, groupes, nouvel utilisateur, nouveau groupe')
+choice = input('Select an option: ')
+if choice == 'x':
+    print('Bye!')
+elif choice == 'utilisateurs' :
+    afficher_utilisateur()
 elif choice == 'groupes':
-    for i in range(len(server['channels'])):
-        print(server['channels'][i]['name'])
-        choicechannel = input('Select a channel')
-        for e in server['messages'] :
-            if e['channel'] == choicechannel :
-                print(e['content'])
+    afficher_groupes()
+    afficher_messages()
+elif choice == 'nouvel utilisateur' :
+    ajouter_utilisateur()
+elif
+
 else:
     print('Unknown option:', choice)
-
