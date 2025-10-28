@@ -20,22 +20,9 @@ server = {
 }
 
 print('=== Messenger ===')
-print('x. Leave, utilisateurs, groupes')
+print('x. Leave')
 choice = input('Select an option: ')
 if choice == 'x':
     print('Bye!')
-elif choice == 'utilisateurs' :
-    for user in server['users']:
-        idnom = str(user['id']) + '. ' + user['name']
-        print(idnom)
-        #idnom = f"{user['id']}.{user['name']}"
-elif choice == 'groupes':
-    for i in range(len(server['channels'])):
-        print(server['channels'][i]['name'])
-        choicechannel = input('Select a channel')
-        for e in server['messages'] :
-            if e['channel'] == choicechannel :
-                print(e['content'])
 else:
     print('Unknown option:', choice)
-
