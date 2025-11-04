@@ -39,7 +39,22 @@ def afficher_messages():
 def ajouter_utilisateur():
     identifiant = int(input('identifiant: '))
     nom = str(input('nom utilisateur: '))
-    server['users'].append({'id' : identifiant,'name' : nom})
+    newuser={'id' : identifiant,'name' : nom}
+    server['users'].append(newuser)
+
+def ajouter_groupe():
+    identifiant = int(input('identifiant du groupe: '))
+    nom = str(input('nom du groupe: '))
+    membres = []
+    ajout=input('Encore un nouveau membre ? (oui/non) : ')
+    while ajout == 'oui':
+        nouveaumembre=input('Identifiant du nouveau membre: ')
+        membres.append(nouveaumembre)
+        ajout=input('Encore un nouveau membre ? (oui/non) : ')
+    nouveaugroupe={'id': identifiant, 'name': nom, 'member_ids': membres}
+    server['channels'].append(nouveaugroupe)
+
+
 
 def menu():
     print('=== Messenger ===')
@@ -49,25 +64,21 @@ def menu():
         print('Bye!')
     elif choice == 'utilisateurs' :
         afficher_utilisateur()
+        menu()
     elif choice == 'groupes':
         afficher_groupes()
         afficher_messages()
+        menu()
     elif choice == 'nouvel utilisateur' :
         ajouter_utilisateur()
+        menu()
+    elif choice == 'nouveau groupe' :
+        ajouter_groupe()
+        menu()
+    else:
+        print('Unknown option:', choice)
+        menu()
 
-print('=== Messenger ===')
-print('x. Leave, menu principal, utilisateurs, groupes, nouvel utilisateur, nouveau groupe')
-choice = input('Select an option: ')
-if choice == 'x':
-    print('Bye!')
-elif choice == 'utilisateurs' :
-    afficher_utilisateur()
-elif choice == 'groupes':
-    afficher_groupes()
-    afficher_messages()
-elif choice == 'nouvel utilisateur' :
-    ajouter_utilisateur()
-elif
 
-else:
-    print('Unknown option:', choice)
+
+menu()
