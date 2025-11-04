@@ -1,7 +1,12 @@
 from datetime import datetime
+import json
 
+with open('server.json', 'r') as file:
+    server = json.load(file)
 
-server=json.load('server.json')
+def save_server():
+    with open('server.json', 'w') as file:
+        json.dump(server, file, indent=4)
 
 def afficher_utilisateur():
     for user in server['users']:
@@ -24,6 +29,7 @@ def ajouter_utilisateur():
     nom = str(input('nom utilisateur: '))
     newuser={'id' : identifiant,'name' : nom}
     server['users'].append(newuser)
+    save_server()
 
 def ajouter_groupe():
     identifiant = int(input('identifiant du groupe: '))
@@ -36,6 +42,7 @@ def ajouter_groupe():
         ajout=input('Encore un nouveau membre ? (oui/non) : ')
     nouveaugroupe={'id': identifiant, 'name': nom, 'member_ids': membres}
     server['channels'].append(nouveaugroupe)
+    save_server()
 
 
 
