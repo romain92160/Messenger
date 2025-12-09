@@ -21,6 +21,14 @@
                 41,
                 23
             ]
+        },
+        {
+            "id": 13,
+            "name": "Al & Ro",
+            "member_ids": [
+                "41",
+                "49"
+            ]
         }
     ],
     "messages": [
@@ -29,7 +37,70 @@
             "reception_date": "025",
             "sender_id": 41,
             "channel": 12,
-            "content": "Hi \u00f0\u0178\u2018\u2039"
+            "content": "Hi"
+        },
+        {
+            "id": 2,
+            "channel": 13,
+            "sender_id": 49,
+            "content": "hello",
+            "reception_date": "2025-12-09T15:00:33.586470"
+        },
+        {
+            "id": 3,
+            "channel": 13,
+            "sender_id": 49,
+            "content": "",
+            "reception_date": "2025-12-09T15:07:13.055481"
+        },
+        {
+            "id": 4,
+            "channel": 13,
+            "user_id": 49,
+            "content": "hello 2",
+            "reception_date": "2025-12-09T15:07:34.539757"
+        },
+        {
+            "id": 5,
+            "channel": 13,
+            "user_id": 49,
+            "content": "bonjour",
+            "reception_date": "2025-12-09T15:08:17.759801"
+        },
+        {
+            "id": 6,
+            "channel": 13,
+            "user_id": 49,
+            "content": "hi",
+            "reception_date": "2025-12-09T15:09:08.511604"
+        },
+        {
+            "id": 7,
+            "channel": 13,
+            "user_id": 49,
+            "content": "hello",
+            "reception_date": "2025-12-09T15:13:20.805639"
+        },
+        {
+            "id": 8,
+            "channel": 13,
+            "user_id": 49,
+            "content": "",
+            "reception_date": "2025-12-09T15:40:47.212324"
+        },
+        {
+            "id": 9,
+            "channel": 13,
+            "sender_id": 49,
+            "content": "hey",
+            "reception_date": "2025-12-09T15:59:49.131902"
+        },
+        {
+            "id": 10,
+            "channel": 13,
+            "sender_id": 49,
+            "content": "hello",
+            "reception_date": "2025-12-09T16:20:25.606844"
         }
     ]
 }
