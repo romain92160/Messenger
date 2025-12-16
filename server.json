@@ -11,6 +11,30 @@
         {
             "id": 49,
             "name": "Romain"
+        },
+        {
+            "id": 50,
+            "name": "Tom"
+        },
+        {
+            "id": 51,
+            "name": "Toto"
+        },
+        {
+            "id": 52,
+            "name": "Titi"
+        },
+        {
+            "id": 53,
+            "name": "Tata"
+        },
+        {
+            "id": 54,
+            "name": "Tete"
+        },
+        {
+            "id": 55,
+            "name": "Tutu"
         }
     ],
     "channels": [
@@ -49,7 +73,7 @@
         {
             "id": 3,
             "channel": 13,
-            "sender_id": 49,
+            "user_id": 49,
             "content": "",
             "reception_date": "2025-12-09T15:07:13.055481"
         },
