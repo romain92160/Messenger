@@ -43,20 +43,59 @@
     ],
     "channels": [
         {
+            "id": 1,
+            "name": "Groupe 5 🐍👨‍💻",
+            "member_ids": []
+        },
+        {
+            "id": 2,
+            "name": "Amis",
+            "member_ids": []
+        },
+        {
+            "id": 4,
+            "name": "Elyes et cie",
+            "member_ids": []
+        },
+        {
+            "id": 6,
+            "name": "groupe de Nico",
+            "member_ids": []
+        },
+        {
+            "id": 7,
+            "name": "slay",
+            "member_ids": []
+        },
+        {
+            "id": 8,
+            "name": "Adele et ele",
+            "member_ids": []
+        },
+        {
+            "id": 9,
+            "name": "Aymar & Gaspard",
+            "member_ids": []
+        },
+        {
+            "id": 10,
+            "name": "Valentin et Léonard",
+            "member_ids": []
+        },
+        {
+            "id": 11,
+            "name": "QSE",
+            "member_ids": []
+        },
+        {
             "id": 12,
-            "name": "Town square",
-            "member_ids": [
-                41,
-                23
-            ]
+            "name": "test",
+            "member_ids": []
         },
         {
             "id": 13,
-            "name": "Al & Ro",
-            "member_ids": [
-                "41",
-                "49"
-            ]
+            "name": "Amis de Romain",
+            "member_ids": []
         }
     ],
     "messages": [
@@ -143,6 +182,13 @@
             "sender_id": 49,
             "content": "",
             "reception_date": "2026-01-06T16:20:00.533393"
+        },
+        {
+            "id": 21,
+            "channel": 13,
+            "sender_id": 17,
+            "content": "hello",
+            "reception_date": "2026-01-13T14:45:07.483930"
         }
     ]
 }

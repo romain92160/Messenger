@@ -58,9 +58,35 @@ class RemoteStorage:
         return [User(user['id'], user['name']) for user in users_data]
     def create_user(self, name: str):
         response = requests.post('https://groupe5-python-mines.fr/users/create', json={'name': name})
-        #if response.status_code =! 200:
-        #    print(response.text)
-
+        if response.status_code != 200:
+            print(response.text)
+    def get_channels(self):
+        response = requests.get('https://groupe5-python-mines.fr/channels')
+        response.raise_for_status
+        channels_data = response.json()
+        return [Channel(chan['id'], chan['name'], chan.get('member_ids', [])) for chan in channels_data]
+    def create_channel(self, name: str):
+        response = requests.post('https://groupe5-python-mines.fr/channels/create', json={'name': name})
+        if response.status_code != 200:
+            print(response.text)
+    def join_channel(self, channel_id: int, user_id: int):
+        response = requests.post(f'https://groupe5-python-mines.fr/channels/{channel_id}/join', json={'user_id': user_id})
+        if response.status_code != 200:
+            print(response.text)
+    def get_channel_members(self, channel_id: int):
+        response = requests.get(f'https://groupe5-python-mines.fr/channels/{channel_id}/members')
+        response.raise_for_status
+        members_data = response.json()
+        return [User.from_dict(m) for m in members_data]
+    def get_messages(self, channel_id: int):
+        response = requests.get(f'https://groupe5-python-mines.fr/channels/{channel_id}/messages')
+        response.raise_for_status
+        messages_data = response.json()
+        return [Message.from_dict(m) for m in messages_data]
+    def create_message(self, channel: int, sender_id: int, content: str):
+        response = requests.post(f'https://groupe5-python-mines.fr/channels/{channel}/messages/post', json={'sender_id': sender_id, 'content': content})
+        if response.status_code != 200:
+            print(response.text)
 
 def load_server(path='server.json'):
     try:
@@ -97,10 +123,16 @@ def afficher_utilisateur():
         print(f"{user.id}. {user.name}")
 
 def afficher_groupes():
-    for chan in server['channels']:
+    for chan in RemoteStorage().get_channels():
         print(chan.id,chan.name)
-
-
+    consulter_groupes = input('Consulter les membres d\'un groupe ? (oui/non) : ')
+    if consulter_groupes == 'oui':
+        choicechannel = int(input('Select a channel id : '))
+        members = RemoteStorage().get_channel_members(choicechannel)
+        print('Membres du groupe :')
+        for member in members:
+            print(f"{member.id}. {member.name}")
+    return
 
 def send_messages(choicechannel : int):
     user_id = int(input('Enter your user id: '))
@@ -134,10 +166,10 @@ def send_messages(choicechannel : int):
 
 
 def afficher_messages():
-    choicechannel = int(input('Select a channel id : '))
-    for mess in server['messages']:
-        if mess.channel == choicechannel:
-            print(mess.reception_date[:16].replace('T', ' '), mess.content)
+    choicechannel = int(input('Voir les messages du groupe (identifiant) : '))
+    messages = RemoteStorage().get_messages(choicechannel)
+    for mess in messages:
+            print(mess.reception_date[:16].replace('T', ' '), mess.sender_id, mess.content)
     send_messages(choicechannel)
 
 
@@ -152,20 +184,33 @@ def ajouter_utilisateur():
     save_server()
 
 
+def get_channel_id_by_name(name: str):
+    """Retourne l'id d'un channel par son nom"""
+    channels = RemoteStorage().get_channels()
+    for chan in channels:
+        if chan.name == name:
+            return chan.id
+    return None 
+
 
 def ajouter_groupe():
-    identifiant = max((c.id for c in server['channels']), default=0) + 1
-    nom = str(input('nom du groupe: '))
-    membres = []
-    ajout = input('Encore un nouveau membre ? (oui/non) : ')
+    nom = str(input('Nom du groupe: '))
+    RemoteStorage().create_channel(nom)
     
+    channel_id = get_channel_id_by_name(nom)
+    if channel_id is None:
+        print("Erreur : impossible de récupérer l'id du channel")
+        return
+    
+    ajout = input('Encore un nouveau membre ? (oui/non) : ')
     while ajout == 'oui':
-        nouveaumembre = int(input('Identifiant du nouveau membre: '))
-        membres.append(nouveaumembre)
+        afficher_utilisateur()
+        try:
+            nouveaumembre = int(input('Identifiant du nouveau membre: '))
+            RemoteStorage().join_channel(channel_id, nouveaumembre)
+        except ValueError:
+            print("Identifiant invalide")
         ajout = input('Encore un nouveau membre ? (oui/non) : ')
-
-    nouveaugroupe = Channel(identifiant, nom, membres)
-    server['channels'].append(nouveaugroupe)
     save_server()
 
 
