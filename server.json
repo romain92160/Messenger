@@ -39,6 +39,10 @@
         {
             "id": 78,
             "name": "UU"
+        },
+        {
+            "id": 79,
+            "name": "rommm"
         }
     ],
     "channels": [
@@ -189,6 +193,20 @@
             "sender_id": 17,
             "content": "hello",
             "reception_date": "2026-01-13T14:45:07.483930"
+        },
+        {
+            "id": 22,
+            "channel": 46,
+            "sender_id": 17,
+            "content": "bonjour",
+            "reception_date": "2026-01-20T16:22:59.963143"
+        },
+        {
+            "id": 23,
+            "channel": 17,
+            "sender_id": 17,
+            "content": "hello",
+            "reception_date": "2026-01-20T16:52:14.747210"
         }
     ]
 }
