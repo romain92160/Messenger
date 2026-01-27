@@ -1,7 +1,5 @@
 from datetime import datetime
-from html import parser
 import json
-import requests
 import os
 import argparse
 import sys
@@ -54,46 +52,63 @@ class Message:
         }
 
 class RemoteStorage:
+    def _require_requests(self):
+        try:
+            import requests  # local import to avoid hard dependency at import time
+        except ModuleNotFoundError as exc:
+            raise ModuleNotFoundError(
+                "RemoteStorage requires the 'requests' package. Install it or use --local."
+            ) from exc
+        return requests
+
     def get_users(self):
+        requests = self._require_requests()
         response = requests.get('https://groupe5-python-mines.fr/users')
-        response.raise_for_status
+        response.raise_for_status()
         users_data = response.json()
         return [User(user['id'], user['name']) for user in users_data]
     
     def create_user(self, name: str):
+        requests = self._require_requests()
         response = requests.post('https://groupe5-python-mines.fr/users/create', json={'name': name})
         if response.status_code != 200:
             print(response.text)
 
     def get_channels(self):
+        requests = self._require_requests()
         response = requests.get('https://groupe5-python-mines.fr/channels')
-        response.raise_for_status
+        response.raise_for_status()
         channels_data = response.json()
         return [Channel(chan['id'], chan['name'], chan.get('member_ids', [])) for chan in channels_data]
     
     def create_channel(self, name: str):
+        requests = self._require_requests()
         response = requests.post('https://groupe5-python-mines.fr/channels/create', json={'name': name})
         if response.status_code != 200:
             print(response.text)
     
     def join_channel(self, channel_id: int, user_id: int):
+        requests = self._require_requests()
         response = requests.post(f'https://groupe5-python-mines.fr/channels/{channel_id}/join', json={'user_id': user_id})
         if response.status_code != 200:
             print(response.text)
     
     def get_channel_members(self, channel_id: int):
+        requests = self._require_requests()
         response = requests.get(f'https://groupe5-python-mines.fr/channels/{channel_id}/members')
-        response.raise_for_status
+        response.raise_for_status()
         members_data = response.json()
         return [User.from_dict(m) for m in members_data]
     
     def get_messages(self, channel_id: int):
+        requests = self._require_requests()
         response = requests.get(f'https://groupe5-python-mines.fr/channels/{channel_id}/messages')
-        response.raise_for_status
+        response.raise_for_status()
         messages_data = response.json()
         return [Message.from_dict(m) for m in messages_data]
     
     def create_message(self, channel: int, sender_id: int, content: str):
+        requests = self._require_requests()
         response = requests.post(f'https://groupe5-python-mines.fr/channels/{channel}/messages/post', json={'sender_id': sender_id, 'content': content})
         if response.status_code != 200:
             print(response.text)
@@ -162,8 +177,6 @@ def save_server(path='server.json'):
     }
     with open(path, 'w', encoding='utf-8') as f:
         json.dump(server_copy, f, indent=4, ensure_ascii=False)
-
-
 
 #storage = LocalStorage()
 storage = RemoteStorage()
