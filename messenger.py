@@ -163,6 +163,11 @@ def save_server(path='server.json'):
     with open(path, 'w', encoding='utf-8') as f:
         json.dump(server_copy, f, indent=4, ensure_ascii=False)
 
+def create_message(self, channel: int, sender_id: int, content: str):
+    next_id = max((m.id for m in server.get('messages', [])), default=0) + 1
+    new_message = Message(next_id, channel, sender_id, content.strip(), datetime.now().isoformat())
+    server['messages'].append(new_message)
+    save_server()
 
 
 #storage = LocalStorage()
@@ -235,28 +240,24 @@ def afficher_groupes():
             print(f"{member.id}. {member.name}")
     return
 
-def send_messages(choicechannel : int):
-    user_id = int(input('Enter your user id: '))
+def send_messages(choicechannel: int):
+    try:
+        user_id = int(input('Enter your user id: '))
+    except ValueError:
+        print("identifiant invalide")
+        return
+    
     content = input('Write a message: ')
+    success = storage.create_message(choicechannel, user_id, content)
+    if not success:
+        menu()
+        return
     
-    next_id = max((m.id for m in server['messages']), default=0) + 1
-    new_message = Message(
-        next_id,
-        choicechannel,
-        user_id,
-        content,
-        datetime.now().isoformat()
-    )
-
-    server['messages'].append(new_message)
-    save_server()
-
     print('Messages dans le channel :')
+    messages = storage.get_messages(choicechannel)
+    for mess in messages:
+        print(f"{mess.reception_date[:16].replace('T', ' ')} | {mess.sender_id}: {mess.content}")
     
-    for mess in server['messages']:
-        if mess.channel == choicechannel:
-            print(mess.reception_date[:16].replace('T', ' '), mess.content)
-
     choicemessage = input('Envoyer un autre message ? (oui/non) : ')
     if choicemessage == 'oui':
         send_messages(choicechannel)
