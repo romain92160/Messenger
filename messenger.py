@@ -11,8 +11,9 @@ class User:
     def __init__(user, id: int, name: str):
             user.id = id
             user.name = name
+    # TB d'avoir fait ces fonctions. N'oubliez pas les fonctions __repr__
     @classmethod
-    def from_dict(cls, d):
+    def from_dict(cls, d: dict):
         return cls(d.get('id'), d.get('name'))
 
     def to_dict(self):
@@ -37,6 +38,8 @@ class Message:
         self.channel = channel
         self.sender_id = sender_id
         self.content = content
+        # Il vaut mieux représenter les horodatages par des objets de
+        # la classe datetime de la bibliothèque datetime.
         self.reception_date = reception_date
 
     @classmethod
@@ -54,79 +57,95 @@ class Message:
         }
 
 class RemoteStorage:
-    def get_users(self):
+    # N'oubliez pas d'indiquer le type de retour de vos méthodes
+    def get_users(self) -> list[User]:
+        # Vu que l'URL de base est souvent répétée, il vaut la stocker
+        # dans une variable à part.
+        # Par ailleurs il vaut mieux la demander à l'utilisateur
+        # et la récupérer dans args.remote ou args.url par exemple.
         response = requests.get('https://groupe5-python-mines.fr/users')
-        response.raise_for_status
+        # raise_for_status est une fonction, il faut des parenthèses
+        # pour qu'elle soit appelée.
+        response.raise_for_status()
         users_data = response.json()
+        # Vous pouvez utiliser User.from_dict(user)
         return [User(user['id'], user['name']) for user in users_data]
     
-    def create_user(self, name: str):
+    def create_user(self, name: str) -> None:
         response = requests.post('https://groupe5-python-mines.fr/users/create', json={'name': name})
         if response.status_code != 200:
             print(response.text)
 
-    def get_channels(self):
+    def get_channels(self) -> list[Channel]:
         response = requests.get('https://groupe5-python-mines.fr/channels')
-        response.raise_for_status
+        response.raise_for_status()
         channels_data = response.json()
         return [Channel(chan['id'], chan['name'], chan.get('member_ids', [])) for chan in channels_data]
     
-    def create_channel(self, name: str):
+    def create_channel(self, name: str) -> None:
         response = requests.post('https://groupe5-python-mines.fr/channels/create', json={'name': name})
         if response.status_code != 200:
             print(response.text)
     
-    def join_channel(self, channel_id: int, user_id: int):
+    def join_channel(self, channel_id: int, user_id: int) -> None:
         response = requests.post(f'https://groupe5-python-mines.fr/channels/{channel_id}/join', json={'user_id': user_id})
         if response.status_code != 200:
             print(response.text)
     
-    def get_channel_members(self, channel_id: int):
+    def get_channel_members(self, channel_id: int) -> list[User]:
         response = requests.get(f'https://groupe5-python-mines.fr/channels/{channel_id}/members')
         response.raise_for_status
         members_data = response.json()
         return [User.from_dict(m) for m in members_data]
     
-    def get_messages(self, channel_id: int):
+    def get_messages(self, channel_id: int) -> list[Message]:
         response = requests.get(f'https://groupe5-python-mines.fr/channels/{channel_id}/messages')
         response.raise_for_status
         messages_data = response.json()
         return [Message.from_dict(m) for m in messages_data]
     
-    def create_message(self, channel: int, sender_id: int, content: str):
+    def create_message(self, channel: int, sender_id: int, content: str) -> None:
         response = requests.post(f'https://groupe5-python-mines.fr/channels/{channel}/messages/post', json={'sender_id': sender_id, 'content': content})
         if response.status_code != 200:
             print(response.text)
 
 
 class LocalStorage:
-    def get_users(self):
+    def get_users(self) -> list[User]:
+        # server n'est pas défini dans ce contexte.
+        # Si vous utilisez une variable dans une méthode, elle doit :
+        # - soit venir d'un paramètre de la méthode
+        # - soit être définie dans le corps de la méthode
+        # - soit être un attribut de la classe, c'est-à-dire
+        #   stockée dans self.server
         return server.get('users', [])
     
-    def create_user(self, name: str):
+    def create_user(self, name: str) -> None:
+        # TB d'avoir utilisé default
         next_id = max((u.id for u in server.get('users', [])), default=0) + 1
         newuser = User(next_id, name)
         server['users'].append(newuser)
         save_server()
 
-    def get_channels(self):
+    def get_channels(self) -> list[Channel]:
         return server.get('channels', [])
     
-    def get_channel_members(self, channel_id: int):
+    def get_channel_members(self, channel_id: int) -> list[User]:
         for chan in server.get('channels', []):
             if chan.id == channel_id:
                 return [user for user in server.get('users', []) if user.id in chan.member_ids]
         return []
         
-    def create_channel(self, name: str):
+    def create_channel(self, name: str) -> None:
         next_id = max((c.id for c in server.get('channels', [])), default=0) + 1
         newchannel = Channel(next_id, name, [])
         server['channels'].append(newchannel)
         save_server()
 
-    def join_channel(self, channel_id: int, user_id: int):
+    def join_channel(self, channel_id: int, user_id: int) -> None:
         for chan in server.get('channels', []):
             if chan.id == channel_id:
+                # TB d'avoir fait cette vérification
                 if user_id not in chan.member_ids:
                     chan.member_ids.append(user_id)
                     save_server()
@@ -134,6 +153,14 @@ class LocalStorage:
     def get_messages(self, channel_id: int):
         return [m for m in server.get('messages', []) if m.channel == channel_id]
 
+# Cette fonction est complètement liée à LocalStorage,
+# elle devrait donc être une méthode de cette classe.
+# Cela vous permettrait de stocker vos listes dans 3 attributs
+# LocalStorage.users, LocalStorage.channels, et LocalStorage.messages,
+# explicitement typés et utilisables directement dans toutes
+# les méthodes de LocalStorage via self.
+# Le path devrait également être stockée dans LocalStorage.path,
+# et rempli par LocalStorage.__init__.
 def load_server(path='server.json'):
         try:
             with open(path, 'r', encoding='utf-8') as f:
@@ -146,14 +173,23 @@ def load_server(path='server.json'):
         data.setdefault('messages', [])
 
         # convertir dict -> objets si nécessaire
+        # C'est forcément nécessaire puisque vous venez de construire
+        # data, vous pouvez donc enlever les if isinstance.
         data['users'] = [User.from_dict(u) if isinstance(u, dict) else u for u in data['users']]
         data['channels'] = [Channel.from_dict(c) if isinstance(c, dict) else c for c in data['channels']]
         data['messages'] = [Message.from_dict(m) if isinstance(m, dict) else m for m in data['messages']]
 
         return data
 
+# Attention, garder une ligne de code comme celle-ci au
+# milieu de définitions de fonctions est risqué, car vous risquez
+# de l'oublier.
+# Toutes les lignes de code qui n'appartiennent pas à des fonctions
+# doivent être écrites à la fin du fichier (à l'exception des imports,
+# en début de fichier).
 server = load_server('server.json')
 
+# Idem, à déplacer dans LocalStorage.save.
 def save_server(path='server.json'):
     server_copy = {
         'users': [u.to_dict() for u in server.get('users', [])],
@@ -163,6 +199,11 @@ def save_server(path='server.json'):
     with open(path, 'w', encoding='utf-8') as f:
         json.dump(server_copy, f, indent=4, ensure_ascii=False)
 
+# self n'a de sens qu'au sein d'une classe. Comme vous n'avez
+# pas indenté cette fonction (ni les précédentes), elle n'appartient
+# à aucune classe. Elle devrait être dans LocalStorage.
+# En l'état, l'ajout de message dans la version "locale" de votre
+# programme ne fonctionne pas.
 def create_message(self, channel: int, sender_id: int, content: str):
     next_id = max((m.id for m in server.get('messages', [])), default=0) + 1
     new_message = Message(next_id, channel, sender_id, content.strip(), datetime.now().isoformat())
@@ -170,6 +211,8 @@ def create_message(self, channel: int, sender_id: int, content: str):
     save_server()
 
 
+# Ces lignes ne servent plus à rien maintenant que vous avez défini
+# select_storage_from_args.
 #storage = LocalStorage()
 storage = RemoteStorage()
 
@@ -180,6 +223,10 @@ def parse_arguments():
     parser = argparse.ArgumentParser(
         description='Messenger - Application de messagerie locale ou distante'
     )
+    # Vous devriez permettre à l'utilisateur de passer le nom du fichier
+    # souhaité dans --local ou l'adresse du serveur dans --remote,
+    # puis passer les 2 valeurs récupérées (args.local ou args.remote)
+    # aux constructeurs de LocalStorage et RemoteStorage
     parser.add_argument(
         '--local',
         action='store_true',
@@ -248,12 +295,20 @@ def send_messages(choicechannel: int):
         return
     
     content = input('Write a message: ')
+    # create_message renvoie toujours None, que le message ait bien
+    # été envoyé ou non.
+    # Ca se voit facilement si vous ajoutez des annotations de type
+    # de retour à toutes vos fonctions.
     success = storage.create_message(choicechannel, user_id, content)
     if not success:
         menu()
         return
     
     print('Messages dans le channel :')
+    # Les lignes qui suivent sont les mêmes que dans afficher_messages,
+    # vous devriez les extraire dans une fonction.
+    # Si vous gardez du code dupliqué, vous risquez de le modifier un jour
+    # dans une fonction et d'oublier l'autre.
     messages = storage.get_messages(choicechannel)
     for mess in messages:
         print(f"{mess.reception_date[:16].replace('T', ' ')} | {mess.sender_id}: {mess.content}")
@@ -271,6 +326,11 @@ def afficher_messages():
     choicechannel = int(input('Voir les messages du groupe (identifiant) : '))
     messages = storage.get_messages(choicechannel)
     for mess in messages:
+            # TB d'avoir personnalisé l'affichage de la date.
+            # Vous auriez pu aller plus loin en la représentant par
+            # un objet de la classe datetime.
+            # Pour le sender, il aurait été plus clair d'aller chercher
+            # le nom, car l'id n'est pas très parlant.
             print(mess.reception_date[:16].replace('T', ' '), mess.sender_id, mess.content)
     send_messages(choicechannel)
 
@@ -279,14 +339,17 @@ def afficher_messages():
 
 def ajouter_utilisateur():
     #next_id = max((getattr(u, 'id', 0) for u in server.get('users', [])), default=0) + 1
+    # Pas besoin d'une conversion en str, input renvoie déjà un str.
     nom = str(input('nom utilisateur: '))
     storage.create_user(nom)
     #newuser = User(next_id, nom)
     #server['users'].append(newuser)
+    # save_server est déjà appelé dans LocalStorage.create_user,
+    # et inutile pour RemoteStorage. Vous pouvez supprimer cette ligne.
     save_server()
 
 
-def get_channel_id_by_name(name: str):
+def get_channel_id_by_name(name: str) -> int | None:
     """Retourne l'id d'un channel par son nom"""
     channels = storage.get_channels()
     for chan in channels:
@@ -310,6 +373,7 @@ def ajouter_groupe():
         try:
             nouveaumembre = int(input('Identifiant du nouveau membre: '))
             storage.join_channel(channel_id, nouveaumembre)
+        # TB d'avoir pensé au except
         except ValueError:
             print("Identifiant invalide")
         ajout = input('Encore un nouveau membre ? (oui/non) : ')
@@ -328,6 +392,11 @@ def menu():
         save_server()
     elif choice == 'utilisateurs' :
         afficher_utilisateur()
+        # Il vaut mieux inclure cet appel à "menu" dans la fonction
+        # "afficher_utilisateur".
+        # Ca vous aiderait à construire des parcours plus complexes :
+        # une fois dans "afficher_utilisateur", vous n'avez plus
+        # à vous préoccuper de la fonction "menu".
         menu()
     elif choice == 'groupes':
         afficher_groupes()
